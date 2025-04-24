@@ -1,0 +1,31 @@
+<html>
+  <link rel="stylesheet" href="../css/ToDO.css">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="../js/ToDO.js"></script>
+<body>
+  <div id="container">
+    <div id="toDO">
+        <div id="header">
+            <div id="title">
+              <div id="app">
+                    <img id="imgIcon" src="../icon/HomeIconOne.png">
+                    <h1 id="appTitle">TO DO!</h1>
+                <div id="time">Monday, 04/04/2025</div>
+<!--                <div id="total">Today Tasks <span id="totalCount">0</span></div>-->
+              </div>
+            </div>
+        </div>
+        <div id="listContainer">
+          <div id="taskContainer">
+
+          </div>
+            <input id="taskInput" type="text" placeholder="Enter something" onkeydown="if(event.key === 'Enter'){ appendNewTask(event , this) }" >
+        </div>
+    </div>
+    <div id="other">
+
+    </div>
+  </div>
+</body>
+
+</html>
