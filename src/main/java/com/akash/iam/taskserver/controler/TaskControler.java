@@ -6,7 +6,6 @@ import com.akash.iam.taskserver.service.TaskService;
 import com.akash.iam.taskserver.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +19,17 @@ public class TaskControler {
     TaskService taskService;
     @Autowired
     UserService userService;
+
+    @GetMapping("/task/{taskId}")
+    public ResponseEntity<Task> getTasksByHeaderAuthentication(@RequestHeader("X-Mail-Auth") String email , @PathVariable("taskId") Long taskId ){
+        System.out.println(email);
+        User user = userService.getUserForEmail(email);
+        if(Objects.nonNull(user) && Objects.nonNull(taskId)){
+            Task task = taskService.getTaskById(user , taskId);
+            return ResponseEntity.ok(task);
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+    }
 
     @GetMapping("/tasks")
     public ResponseEntity<List<Task>> getTasksByHeaderAuthentication(@RequestHeader("X-Mail-Auth") String email){
@@ -43,6 +53,24 @@ public class TaskControler {
             return ResponseEntity.ok(tasks);
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+    }
+
+    @PutMapping("/task/{taskId}/{action}")
+    public ResponseEntity<String> doTaskActions(@RequestHeader("X-Mail-Auth") String email  , @PathVariable("taskId") String taskId , @PathVariable("action") String actionType){
+        User user = userService.getUserForEmail(email);
+        if(Objects.nonNull(user)){
+            Task task = taskService.getTaskById(user , Long.valueOf(taskId));
+            if(Objects.nonNull(task)){
+                switch (actionType){
+                    case "complete" : taskService.markComplete(task); break;
+                    case "remove" : taskService.strikeTask(task); break;
+                    case "reopen" : taskService.reOpen(task); break;
+                }
+                return ResponseEntity.ok("Success");
+            }
+            return ResponseEntity.badRequest().body("No Task for given ID");
+        }
+        return ResponseEntity.badRequest().body("No Authentication For the Application");
     }
 
 

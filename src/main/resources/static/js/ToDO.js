@@ -76,6 +76,7 @@ function renderTasks(tasksList){
 function renderTask(task){
 
   const  inputContainer = document.getElementById("taskContainer");
+  let status = task.status;
 
   const inputGroup = document.createElement('div');
   inputGroup.classList.add('task');
@@ -85,6 +86,10 @@ function renderTask(task){
   completeBtn.id = 'Task_listNo_' + task.id+'_complete'
   completeBtn.src = "../icon/checkbox-component-checked-svgrepo-com.svg"
   completeBtn.className = 'deleteIcon';
+  if(status != "OPEN"){
+    completeBtn.className = completeBtn.className.concat(" hide");
+    inputGroup.classList.add( status == "DELETED" ? "removed" : "completed");
+  }
 
   completeBtn.addEventListener('click', function() {
     markCompleted(message.id);
@@ -99,6 +104,10 @@ function renderTask(task){
   deleteBtn.id = 'Task_listNo_' + task.id+'_delete'
   deleteBtn.src = "../icon/delete-svgrepo-com.svg"
   deleteBtn.className = 'deleteIcon';
+  if(status != "OPEN"){
+    deleteBtn.className = deleteBtn.className.concat(" hide");
+  }
+
   deleteBtn.addEventListener('click', function() {
     deleteTask(message.id);
   });
@@ -106,7 +115,10 @@ function renderTask(task){
   const reOpenTaskBtn = document.createElement('img');
   reOpenTaskBtn.id = 'Task_listNo_' + task.id+'_reopen'
   reOpenTaskBtn.src = "../icon/open-svgrepo-com.svg"
-  reOpenTaskBtn.className = 'openIcon hide';
+  reOpenTaskBtn.className = 'openIcon';
+  if(status == "OPEN"){
+    reOpenTaskBtn.className = reOpenTaskBtn.className.concat(" hide");
+  }
   reOpenTaskBtn.addEventListener('click', function() {
     reOpenTask(message.id);
   });
@@ -119,25 +131,52 @@ function renderTask(task){
 }
 
 function markCompleted(id){
-  const  inputContainer = document.getElementById('Task_'+id);
-  inputContainer.classList.add("completed");
-  hideIcons(id);
-  console.log("Removing "+id);
+  axios.put('http://localhost:8000/task/'+ id.replaceAll("listNo_","")+'/complete', {} , {
+    headers:{
+      "X-Mail-Auth" : mail
+    }
+  }).then(response => {
+      const  inputContainer = document.getElementById('Task_'+id);
+      inputContainer.classList.add("completed");
+      hideIcons(id);
+      console.log("Marked Completed "+id);
+  }).catch(error => {
+    console.error("There was an error!", error);
+    alert("Sorry There was an error! " + error);
+  });
 }
 
 function deleteTask(id){
-  const  inputContainer = document.getElementById('Task_'+id);
-  inputContainer.classList.add("removed");
-  hideIcons(id);
-  console.log("Removing "+id);
+  axios.put('http://localhost:8000/task/'+ id.replaceAll("listNo_","")+'/remove' , {} , {
+    headers:{
+      "X-Mail-Auth" : mail
+    }
+  }).then(response => {
+    const  inputContainer = document.getElementById('Task_'+id);
+    inputContainer.classList.add("removed");
+    hideIcons(id);
+    console.log("Delete  "+id);
+  }).catch(error => {
+    console.error("There was an error!", error);
+    alert("Sorry There was an error! " + error);
+  });
 }
 
 function reOpenTask(id){
-  const  inputContainer = document.getElementById('Task_'+id);
-  inputContainer.classList.remove("removed");
-  inputContainer.classList.remove("completed");
-  openIcons(id);
-  console.log("Opended "+id);
+  axios.put('http://localhost:8000/task/'+ id.replaceAll("listNo_","")+'/reopen', {}  , {
+    headers:{
+      "X-Mail-Auth" : mail
+    }
+  }).then(response => {
+    const  inputContainer = document.getElementById('Task_'+id);
+    inputContainer.classList.remove("removed");
+    inputContainer.classList.remove("completed");
+    openIcons(id);
+    console.log("Reopened "+id);
+  }).catch(error => {
+    console.error("There was an error!", error);
+    alert("Sorry There was an error! " + error);
+  });
 }
 
 
